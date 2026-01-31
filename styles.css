@@ -15,6 +15,66 @@
   --shadow: 0 20px 45px rgba(5, 12, 9, 0.45);
 }
 
+body[data-theme="forest"] {
+  --bg: #0f1a16;
+  --bg-2: #13241c;
+  --card: #182c24;
+  --accent: #f7b267;
+  --level-0: #20342b;
+  --level-1: #2e4b3b;
+  --level-2: #3f6b52;
+  --level-3: #4f8a61;
+  --level-4: #72b377;
+}
+
+body[data-theme="neutral"] {
+  --bg: #141618;
+  --bg-2: #1b1e21;
+  --card: #23272b;
+  --accent: #cfd6dc;
+  --level-0: #2a2f34;
+  --level-1: #3a4046;
+  --level-2: #4a5158;
+  --level-3: #5a626b;
+  --level-4: #707b86;
+}
+
+body[data-theme="ocean"] {
+  --bg: #0b1d2a;
+  --bg-2: #102538;
+  --card: #142f46;
+  --accent: #62d2ff;
+  --level-0: #1a2c3f;
+  --level-1: #22435f;
+  --level-2: #2e5f85;
+  --level-3: #3a79a6;
+  --level-4: #56a7d6;
+}
+
+body[data-theme="sunset"] {
+  --bg: #1d1417;
+  --bg-2: #27181d;
+  --card: #332027;
+  --accent: #ff9f76;
+  --level-0: #3a2326;
+  --level-1: #553037;
+  --level-2: #793846;
+  --level-3: #9b4a5a;
+  --level-4: #c5656d;
+}
+
+body[data-theme="violet"] {
+  --bg: #141225;
+  --bg-2: #1b1730;
+  --card: #231f3b;
+  --accent: #c7a7ff;
+  --level-0: #2c273f;
+  --level-1: #403560;
+  --level-2: #5b4785;
+  --level-3: #765aaa;
+  --level-4: #9f7ed4;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -24,8 +84,8 @@ body {
   min-height: 100vh;
   font-family: "Space Grotesk", system-ui, sans-serif;
   color: var(--text);
-  background: radial-gradient(circle at top left, #1d3b2c, transparent 55%),
-    radial-gradient(circle at 20% 30%, #203f33, transparent 45%),
+  background: radial-gradient(circle at top left, var(--bg-2), transparent 55%),
+    radial-gradient(circle at 20% 30%, var(--card), transparent 45%),
     linear-gradient(160deg, var(--bg), #0b120f);
   display: flex;
   justify-content: center;
@@ -173,17 +233,58 @@ h1 {
 }
 
 .habit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  gap: 12px;
+}
+
+.habit-toggle {
   width: 100%;
   background: transparent;
   border: none;
   color: var(--text);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 20px;
   cursor: pointer;
   font-size: 18px;
   font-weight: 600;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.habit-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.habit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.35);
 }
 
 .habit-meta {
@@ -197,13 +298,21 @@ h1 {
 }
 
 .habit-content {
-  display: none;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  overflow: hidden;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 18px 20px 22px;
+  padding: 0 20px;
+  transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.35s ease,
+    padding 0.3s ease;
 }
 
 .habit.open .habit-content {
-  display: block;
+  max-height: 1200px;
+  opacity: 1;
+  transform: translateY(0);
+  padding: 18px 20px 22px;
 }
 
 .habit-controls {
@@ -211,6 +320,34 @@ h1 {
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 16px;
+}
+
+.habit-style {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.habit-style label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.habit-style select {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(10, 18, 14, 0.6);
+  color: var(--text);
+  padding: 6px 12px;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0.02em;
 }
 
 .habit-summary {
@@ -366,6 +503,7 @@ h1 {
 .level-2 { background: var(--level-2); }
 .level-3 { background: var(--level-3); }
 .level-4 { background: var(--level-4); }
+
 
 @media (max-width: 720px) {
   .summary {

@@ -1,6 +1,16 @@
 const WEEKS = 26;
 const DAYS_PER_WEEK = 7;
 const STORAGE_KEY = "habit-tracker-habits";
+const DEFAULT_THEME = "forest";
+const NEUTRAL_THEME = "neutral";
+const DEFAULT_ICON = "✨";
+const THEMES = [
+  { id: "forest", label: "Forest" },
+  { id: "ocean", label: "Ocean" },
+  { id: "sunset", label: "Sunset" },
+  { id: "violet", label: "Violet" },
+];
+const ICONS = ["✨", "💧", "🏃", "📚", "🧘", "🧠", "📝", "🎯"];
 
 const habitsEl = document.getElementById("habits");
 const habitCountEl = document.getElementById("habitCount");
@@ -10,6 +20,17 @@ const habitNameInput = document.getElementById("habitName");
 
 let habitState = loadState();
 const selectedDates = {};
+let currentOpenHabitId = null;
+
+function normalizeHabit(habit) {
+  return {
+    id: habit.id || crypto.randomUUID(),
+    name: habit.name || "Habit",
+    icon: habit.icon || DEFAULT_ICON,
+    theme: habit.theme || DEFAULT_THEME,
+    commits: habit.commits && typeof habit.commits === "object" ? habit.commits : {},
+  };
+}
 
 function loadState() {
   try {
@@ -19,17 +40,17 @@ function loadState() {
     }
     const parsed = JSON.parse(raw);
     if (parsed && Array.isArray(parsed.habits)) {
-      return parsed;
+      return { habits: parsed.habits.map(normalizeHabit) };
     }
 
     if (parsed && typeof parsed === "object") {
       return {
         habits: [
-          {
+          normalizeHabit({
             id: crypto.randomUUID(),
             name: "Habit",
             commits: parsed,
-          },
+          }),
         ],
       };
     }
@@ -63,6 +84,16 @@ function commitLevel(count) {
   if (count <= 4) return 2;
   if (count <= 7) return 3;
   return 4;
+}
+
+function applyTheme(themeId) {
+  document.body.dataset.theme = themeId;
+}
+
+function getOpenTheme() {
+  if (!currentOpenHabitId) return NEUTRAL_THEME;
+  const habit = habitState.habits.find((item) => item.id === currentOpenHabitId);
+  return habit ? habit.theme || DEFAULT_THEME : NEUTRAL_THEME;
 }
 
 function buildCalendarDates() {
@@ -163,17 +194,25 @@ function buildGrid(habit, selectedDate, onSelect) {
 function renderHabit(habit, isOpen) {
   const wrapper = document.createElement("article");
   wrapper.className = "habit";
+  wrapper.dataset.id = habit.id;
+  wrapper.dataset.theme = habit.theme || DEFAULT_THEME;
   if (isOpen) {
     wrapper.classList.add("open");
   }
 
-  const header = document.createElement("button");
-  header.type = "button";
+  const header = document.createElement("div");
   header.className = "habit-header";
   header.innerHTML = `
-    <span>${habit.name}</span>
-    <div class="habit-meta">
-      <span>Entries ${Object.keys(habit.commits).length}</span>
+    <button type="button" class="habit-toggle">
+      <span class="habit-icon">${habit.icon || DEFAULT_ICON}</span>
+      <span>${habit.name}</span>
+      <div class="habit-meta">
+        <span>Entries ${Object.keys(habit.commits).length}</span>
+      </div>
+    </button>
+    <div class="habit-actions">
+      <button type="button" class="icon-btn" data-action="rename">Rename</button>
+      <button type="button" class="icon-btn" data-action="delete">Delete</button>
     </div>
   `;
 
@@ -214,6 +253,31 @@ function renderHabit(habit, isOpen) {
 
   const selectedDateEl = controls.querySelector(".selected-date");
   const selectedCountEl = controls.querySelector(".selected-count");
+  const toggleBtn = header.querySelector(".habit-toggle");
+  const renameBtn = header.querySelector("[data-action='rename']");
+  const deleteBtn = header.querySelector("[data-action='delete']");
+
+  const styleRow = document.createElement("div");
+  styleRow.className = "habit-style";
+  const themeOptions = THEMES.map(
+    (theme) => `<option value="${theme.id}">${theme.label}</option>`
+  ).join("");
+  const iconList = ICONS.includes(habit.icon) ? ICONS : [habit.icon, ...ICONS];
+  const iconOptions = iconList
+    .map((icon) => `<option value="${icon}">${icon}</option>`)
+    .join("");
+  styleRow.innerHTML = `
+    <label>Theme
+      <select data-style="theme">${themeOptions}</select>
+    </label>
+    <label>Icon
+      <select data-style="icon">${iconOptions}</select>
+    </label>
+  `;
+  const themeSelect = styleRow.querySelector("[data-style='theme']");
+  const iconSelect = styleRow.querySelector("[data-style='icon']");
+  themeSelect.value = habit.theme || DEFAULT_THEME;
+  iconSelect.value = habit.icon || DEFAULT_ICON;
 
   function updateSummary() {
     const selectedDate = selectedDates[habit.id];
@@ -261,6 +325,18 @@ function renderHabit(habit, isOpen) {
 
   controls.querySelector("button[data-clear]").addEventListener("click", clearDay);
 
+  themeSelect.addEventListener("change", () => {
+    habit.theme = themeSelect.value;
+    saveState();
+    renderHabits(habit.id);
+  });
+
+  iconSelect.addEventListener("change", () => {
+    habit.icon = iconSelect.value;
+    saveState();
+    renderHabits(habit.id);
+  });
+
   const { grid, weeks } = buildGrid(habit, selectedDates[habit.id], selectDate);
   const months = buildMonths(weeks);
   const labels = buildDayLabels();
@@ -273,16 +349,48 @@ function renderHabit(habit, isOpen) {
   chart.appendChild(chartBody);
 
   content.appendChild(controls);
+  content.appendChild(styleRow);
   content.appendChild(chart);
 
-  header.addEventListener("click", () => {
+  toggleBtn.addEventListener("click", () => {
     const isOpen = wrapper.classList.contains("open");
     document.querySelectorAll(".habit").forEach((node) => {
       node.classList.remove("open");
     });
-    if (!isOpen) {
-      wrapper.classList.add("open");
+    if (isOpen) {
+      currentOpenHabitId = null;
+      applyTheme(NEUTRAL_THEME);
+      return;
     }
+    wrapper.classList.add("open");
+    currentOpenHabitId = habit.id;
+    applyTheme(habit.theme || DEFAULT_THEME);
+  });
+
+  wrapper.addEventListener("mouseenter", () => {
+    applyTheme(habit.theme || DEFAULT_THEME);
+  });
+
+  wrapper.addEventListener("mouseleave", () => {
+    applyTheme(getOpenTheme());
+  });
+
+  renameBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const next = prompt("Rename habit", habit.name);
+    if (!next) return;
+    habit.name = next.trim() || habit.name;
+    saveState();
+    renderHabits(habit.id);
+  });
+
+  deleteBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (!confirm(`Delete "${habit.name}"?`)) return;
+    habitState.habits = habitState.habits.filter((h) => h.id !== habit.id);
+    delete selectedDates[habit.id];
+    saveState();
+    renderHabits();
   });
 
   wrapper.appendChild(header);
@@ -293,7 +401,7 @@ function renderHabit(habit, isOpen) {
   return wrapper;
 }
 
-function renderHabits(openHabitId = null) {
+function renderHabits(openHabitId = undefined) {
   habitsEl.innerHTML = "";
 
   if (!habitState.habits.length) {
@@ -306,10 +414,16 @@ function renderHabits(openHabitId = null) {
     `;
     habitsEl.appendChild(empty);
     habitCountEl.textContent = "0";
+    currentOpenHabitId = null;
+    applyTheme(NEUTRAL_THEME);
     return;
   }
 
-  const resolvedOpenId = openHabitId || habitState.habits[0].id;
+  const resolvedOpenId =
+    openHabitId === undefined ? habitState.habits[0].id : openHabitId;
+  currentOpenHabitId = resolvedOpenId || null;
+  const openHabit = habitState.habits.find((habit) => habit.id === resolvedOpenId);
+  applyTheme(openHabit ? openHabit.theme || DEFAULT_THEME : NEUTRAL_THEME);
 
   habitState.habits.forEach((habit) => {
     const habitEl = renderHabit(habit, habit.id === resolvedOpenId);
@@ -323,6 +437,8 @@ function addHabit(name) {
   habitState.habits.unshift({
     id: crypto.randomUUID(),
     name,
+    icon: DEFAULT_ICON,
+    theme: DEFAULT_THEME,
     commits: {},
   });
   saveState();
