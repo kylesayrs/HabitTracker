@@ -10,7 +10,7 @@ const THEMES = [
   { id: "sunset", label: "Sunset" },
   { id: "violet", label: "Violet" },
 ];
-const ICONS = ["✨", "💧", "🏃", "📚", "🧘", "🧠", "📝", "🎯"];
+const ICONS = ["💪", "💤", "🛏️", "📚", "🧘", "🧠", "📝", "🎯"];
 
 const habitsEl = document.getElementById("habits");
 const habitCountEl = document.getElementById("habitCount");

@@ -1,6 +1,6 @@
 # Habit Tracker
 
-![Habit Tracker screenshot](assets/HomePage.png)
+![Habit Tracker demo](assets/demo.gif)
 
 A lightweight habit tracker inspired by the GitHub commit history grid. Create multiple habits, expand them in an accordion list, and log daily "commits" to build streaks over time. Each habit has its own theme and icon, and the page theme adapts to the active habit.
 
