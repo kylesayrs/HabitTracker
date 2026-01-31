@@ -15,6 +15,60 @@
   --shadow: 0 20px 45px rgba(5, 12, 9, 0.45);
 }
 
+@property --bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #0f1a16;
+}
+
+@property --bg-2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #13241c;
+}
+
+@property --card {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #182c24;
+}
+
+@property --accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f7b267;
+}
+
+@property --level-0 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #20342b;
+}
+
+@property --level-1 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #2e4b3b;
+}
+
+@property --level-2 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #3f6b52;
+}
+
+@property --level-3 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #4f8a61;
+}
+
+@property --level-4 {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #72b377;
+}
+
 body[data-theme="forest"] {
   --bg: #0f1a16;
   --bg-2: #13241c;
@@ -84,12 +138,18 @@ body {
   min-height: 100vh;
   font-family: "Space Grotesk", system-ui, sans-serif;
   color: var(--text);
+  background-color: var(--bg);
   background: radial-gradient(circle at top left, var(--bg-2), transparent 55%),
     radial-gradient(circle at 20% 30%, var(--card), transparent 45%),
     linear-gradient(160deg, var(--bg), #0b120f);
   display: flex;
   justify-content: center;
   padding: 48px 20px 80px;
+  transition: color 0.4s ease;
+  transition-property: --bg, --bg-2, --card, --accent, --level-0, --level-1, --level-2,
+    --level-3, --level-4, color;
+  transition-duration: 0.45s;
+  transition-timing-function: ease;
 }
 
 .app {
