@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Habit Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Habit Tracker</p>
+          <h1>Commit to the habit, one day at a time.</h1>
+          <p class="subtext">Add habits, expand one, then click days to log commits. Data is saved locally.</p>
+        </div>
+        <div class="summary">
+          <div class="stat">
+            <span class="stat-label">Habits</span>
+            <span id="habitCount" class="stat-value">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Today</span>
+            <span id="todayLabel" class="stat-value">—</span>
+          </div>
+        </div>
+      </header>
+
+      <section class="controls">
+        <form id="habitForm" class="habit-form">
+          <input id="habitName" type="text" placeholder="New habit name" maxlength="32" required />
+          <button class="btn" type="submit">Add Habit</button>
+        </form>
+      </section>
+
+      <section class="habits" id="habits"></section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
